@@ -15,6 +15,7 @@
 		"sourceMap": true,
 		"removeComments": true,
 		"baseUrl": "./",
+		"types": ["node"],
 		"paths": {
 			"@/*": ["src/*"],
 			"@prisma/*": ["prisma/*"]

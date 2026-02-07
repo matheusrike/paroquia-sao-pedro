@@ -14,6 +14,7 @@
 		"allowImportingTsExtensions": true,
 		"noEmit": true,
 		"baseUrl": "./",
+		"types": ["node"],
 		"paths": {
 			"@/*": ["src/*"],
 			"@prisma/*": ["prisma/*"]
@@ -23,7 +24,8 @@
 		"src/**/*",
 		"prisma/client.ts",
 		"prisma/seed.ts",
-		"prisma/mock.ts"
+		"prisma/mock.ts",
+		"./prisma.config.ts"
 	],
-	"exclude": ["node_modules", "**/*.config.ts"]
+	"exclude": ["node_modules"]
 }

@@ -1,0 +1,152 @@
+generator client {
+  provider = "prisma-client"
+  output   = "./generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  MEMBER
+  CATECHUMEN
+  CATECHIST
+  ADMIN
+}
+
+enum DonationStatus {
+  PENDING
+  PAID
+  CANCELED
+}
+
+enum CeremonyStatus {
+  PENDING
+  UNDER_REVIEW
+  APPROVED
+  COMPLETED
+}
+
+enum CeremonyPersonType {
+  GROOM
+  BRIDE
+}
+
+enum CeremonyDocumentType {
+  GROOM_ID
+  BRIDE_ID
+  CERTIFICATE
+  COURSE
+  OTHER
+}
+
+model User {
+  id        String    @id @default(uuid())
+  name      String
+  email     String    @unique
+  phone     String
+  cpf       String?   @unique
+  birthDate DateTime?
+  address   String?
+  role      UserRole
+  status    String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  catechistClasses CatechismClass[]  @relation("CatechistClasses")
+  classEnrollments ClassEnrollment[]
+
+  @@map("users")
+}
+
+model CatechismClass {
+  id          String   @id @default(uuid())
+  minAge      Int
+  maxAge      Int
+  period      String
+  location    String
+  status      String
+  catechistId String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  catechist User              @relation("CatechistClasses", fields: [catechistId], references: [id])
+  students  ClassEnrollment[]
+
+  @@map("catechism_classes")
+}
+
+model ClassEnrollment {
+  id        String   @id @default(uuid())
+  classId   String
+  userId    String
+  createdAt DateTime @default(now())
+
+  class CatechismClass @relation(fields: [classId], references: [id])
+  user  User           @relation(fields: [userId], references: [id])
+
+  @@unique([classId, userId])
+  @@map("class_enrollments")
+}
+
+model Ceremony {
+  id            String         @id @default(uuid())
+  scheduledDate DateTime
+  status        CeremonyStatus
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  people    CeremonyPerson[]
+  documents CeremonyDocument[]
+
+  @@map("ceremonies")
+}
+
+model CeremonyPerson {
+  id         String             @id @default(uuid())
+  ceremonyId String
+  name       String
+  cpf        String
+  phone      String
+  address    String
+  gender     String
+  type       CeremonyPersonType
+  createdAt  DateTime           @default(now())
+  updatedAt  DateTime           @updatedAt
+
+  ceremony Ceremony @relation(fields: [ceremonyId], references: [id])
+
+  @@map("ceremony_people")
+}
+
+model CeremonyDocument {
+  id         String               @id @default(uuid())
+  ceremonyId String
+  type       CeremonyDocumentType
+  fileUrl    String
+  fileName   String
+  fileSize   Int
+  mimeType   String
+  createdAt  DateTime             @default(now())
+
+  ceremony Ceremony @relation(fields: [ceremonyId], references: [id])
+
+  @@map("ceremony_documents")
+}
+
+model Donation {
+  id               String         @id @default(uuid())
+  amount           Decimal        @db.Decimal(10, 2)
+  status           DonationStatus
+  method           String
+  gateway          String
+  gatewayPaymentId String?
+  fee              Decimal?       @db.Decimal(10, 2)
+  netAmount        Decimal?       @db.Decimal(10, 2)
+  donorName        String?
+  donorEmail       String?
+  paidAt           DateTime?
+  createdAt        DateTime       @default(now())
+
+  @@map("donations")
+}
