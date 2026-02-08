@@ -25,6 +25,7 @@ enum CeremonyStatus {
   UNDER_REVIEW
   APPROVED
   COMPLETED
+  CANCELED
 }
 
 enum CeremonyPersonType {
@@ -47,7 +48,6 @@ model User {
   phone     String
   cpf       String?   @unique
   birthDate DateTime?
-  address   String?
   role      UserRole
   status    String
   createdAt DateTime  @default(now())

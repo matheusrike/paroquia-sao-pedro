@@ -1,0 +1,30 @@
+name: services-paroquia-sao-pedro
+services:
+    database:
+        container_name: database
+        image: postgres:16-alpine
+        environment:
+            POSTGRES_DB: ${POSTGRES_DB:-paroquia-sao-pedro}
+            POSTGRES_USER: ${POSTGRES_USER:-admin}
+            POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+        ports:
+            - 5432:5432
+        volumes:
+            - database:/var/lib/postgresql/data
+        healthcheck:
+            test:
+                [
+                    'CMD-SHELL',
+                    'pg_isready -U ${POSTGRES_USER:-admin} -d ${POSTGRES_DB:-paroquia-sao-pedro}',
+                ]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+        networks:
+            - private
+volumes:
+    database:
+
+networks:
+    private:
+        driver: bridge
