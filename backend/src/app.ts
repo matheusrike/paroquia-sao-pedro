@@ -1,7 +1,12 @@
 import { fastify } from 'fastify';
 import { env } from './env';
 
+import { UserRouter } from '@/routes/User.route';
+
 const app = fastify();
+
+UserRouter.registerRoutes(app);
+
 
 app.listen({
 	port: env.PORT,
