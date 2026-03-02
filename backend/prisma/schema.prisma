@@ -14,6 +14,16 @@ enum UserRole {
   ADMIN
 }
 
+enum DaysOfWeek {
+  MON
+  THU
+  WED
+  TUE
+  FRI
+  SAT
+  SUN
+}
+
 enum DonationStatus {
   PENDING
   PAID
@@ -60,15 +70,17 @@ model User {
 }
 
 model CatechismClass {
-  id          String   @id @default(uuid())
+  id          String     @id @default(uuid())
   minAge      Int
   maxAge      Int
-  period      String
+  dayOfWeek   DaysOfWeek
+  startTime   DateTime
+  endTime     DateTime
   location    String
-  status      String
+  status      Boolean
   catechistId String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
 
   catechist User              @relation("CatechistClasses", fields: [catechistId], references: [id])
   students  ClassEnrollment[]
