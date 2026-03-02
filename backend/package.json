@@ -12,7 +12,9 @@
 		"format": "prettier --write .",
 		"prisma:generate": "prisma generate",
 		"prisma:studio": "prisma studio",
-		"test": "echo \"No tests specified\""
+		"test": "vitest",
+		"test:watch": "vitest watch",
+		"test:coverage": "vitest run --coverage"
 	},
 	"keywords": [],
 	"author": "",
@@ -38,14 +40,18 @@
 		"@types/bcrypt": "^6.0.0",
 		"@types/node": "^25.2.0",
 		"@types/pg": "^8.16.0",
+		"@types/supertest": "^7.2.0",
+		"@vitest/coverage-v8": "^4.0.18",
 		"eslint": "^9.39.2",
 		"globals": "^17.3.0",
 		"jiti": "^2.6.1",
 		"prettier": "3.8.1",
 		"prisma": "^7.3.0",
+		"supertest": "^7.2.2",
 		"tsc-alias": "^1.8.16",
 		"tsx": "^4.21.0",
 		"typescript": "^5.9.3",
-		"typescript-eslint": "^8.54.0"
+		"typescript-eslint": "^8.54.0",
+		"vitest": "^4.0.18"
 	}
 }
