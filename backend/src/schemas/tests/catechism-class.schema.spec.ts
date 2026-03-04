@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { createCatechismClassSchema } from './tests/catechism-class.schema';
+import { createCatechismClassSchema } from '@/schemas/catechism-class.schema';
 
 describe('Create Catechism Class Schema', () => {
 	it('should be able to validate a correct catechism class data', () => {

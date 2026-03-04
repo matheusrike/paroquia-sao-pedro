@@ -1,3 +1,4 @@
+import { buildDateWithTime } from '@/utils/convert-date-with-time';
 import { z } from 'zod';
 
 export const createCatechismClassSchema = z.object({
@@ -6,8 +7,12 @@ export const createCatechismClassSchema = z.object({
 	dayOfWeek: z.enum(['MON', 'THU', 'WED', 'TUE', 'FRI', 'SAT', 'SUN'], {
 		error: 'invalid day of week (use MON, TUE, WED, THU, FRI, SAT or SUN)',
 	}),
-	startTime: z.iso.time({ precision: -1, error: 'Invalid Hour (use HH:MM)' }),
-	endTime: z.iso.time({ precision: -1, error: 'Invalid Hour (use HH:MM)' }),
+	startTime: z.iso
+		.time({ precision: -1, error: 'Invalid Hour (use HH:MM)' })
+		.transform((startTime) => buildDateWithTime(startTime)),
+	endTime: z.iso
+		.time({ precision: -1, error: 'Invalid Hour (use HH:MM)' })
+		.transform((endTime) => buildDateWithTime(endTime)),
 	location: z.string(),
 	catechistId: z.uuid({ version: 'v7', error: 'Invalid Catechist ID' }),
 });
@@ -21,13 +26,17 @@ export const findAllCatechismClassFiltersSchema = z.object({
 	status: z.boolean().optional(),
 	startTime: z.iso
 		.time({ precision: -1, error: 'Invalid Hour (use HH:MM)' })
+		.transform((startTime) => buildDateWithTime(startTime))
 		.optional(),
 	endTime: z.iso
 		.time({ precision: -1, error: 'Invalid Hour (use HH:MM)' })
+		.transform((endTime) => buildDateWithTime(endTime))
 		.optional(),
-	dayOfWeek: z.enum(['MON', 'THU', 'WED', 'TUE', 'FRI', 'SAT', 'SUN'], {
-		error: 'invalid day of week (use MON, TUE, WED, THU, FRI, SAT or SUN)',
-	}),
+	dayOfWeek: z
+		.enum(['MON', 'THU', 'WED', 'TUE', 'FRI', 'SAT', 'SUN'], {
+			error: 'invalid day of week (use MON, TUE, WED, THU, FRI, SAT or SUN)',
+		})
+		.optional(),
 });
 
 export type FindAllCatechismClassFilters = z.infer<

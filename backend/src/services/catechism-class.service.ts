@@ -1,21 +1,21 @@
 import {
+	ICatechismClassRepository,
+	IUserRepository,
+} from '@/repositories/interfaces';
+import {
 	CreateCatechismClass,
 	FindAllCatechismClassFilters,
-} from '@/schemas/tests/catechism-class.schema';
-import { buildDateWithTime } from '@/utils/convert-date-with-time';
-import { PrismaClient } from '@prisma/generated/prisma/client';
+} from '@/schemas/catechism-class.schema';
 
 export class CatechismClassService {
-	constructor(private database: PrismaClient) {}
+	constructor(
+		private UserRepository: IUserRepository,
+		private CatechismClassRepository: ICatechismClassRepository,
+	) {}
 
-	async create(data: CreateCatechismClass) {
-		const startTime = buildDateWithTime(data.startTime);
-		const endTime = buildDateWithTime(data.endTime);
-
+	public async create(data: CreateCatechismClass) {
 		// Verifica se o usuario e um catequista valido
-		const catechist = await this.database.user.findUnique({
-			where: { id: data.catechistId },
-		});
+		const catechist = await this.UserRepository.findById(data.catechistId);
 
 		if (!catechist || catechist.role !== 'CATECHIST') {
 			throw new Error('Catechist not found');
@@ -26,32 +26,25 @@ export class CatechismClassService {
 			throw new Error('Inconsistency in the provided age ranges');
 		}
 
-		// Verifica a disponibilidade do horario
-		const existingClass = await this.database.catechismClass.findFirst({
-			where: {
-				dayOfWeek: data.dayOfWeek,
-				location: data.location,
-				status: true,
-				AND: [
-					{ startTime: { lt: endTime } },
-					{ endTime: { gt: startTime } },
-				],
-			},
-		});
+		// Verifica a disponibilidade da sala, catequista e se ha conflitos de horarios
+		const params = {
+			status: true,
+			dayOfWeek: data.dayOfWeek,
+			startTime: data.startTime,
+			endTime: data.endTime,
+			location: data.location,
+			catechistId: data.catechistId,
+		};
+
+		const existingClass =
+			await this.CatechismClassRepository.findConflict(params);
 
 		if (existingClass) throw new Error('Conflict with existing class');
 
-		return this.database.catechismClass.create({
-			data: {
-				...data,
-				status: true,
-				startTime: buildDateWithTime(data.startTime),
-				endTime: buildDateWithTime(data.endTime),
-			},
-		});
+		return this.CatechismClassRepository.create({ ...data, status: true });
 	}
 
 	async findAll(filters: FindAllCatechismClassFilters) {
-		return this.database.catechismClass.findMany({ where: filters });
+		return this.CatechismClassRepository.findAll(filters);
 	}
 }
