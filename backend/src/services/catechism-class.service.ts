@@ -1,7 +1,5 @@
-import {
-	ICatechismClassRepository,
-	IUserRepository,
-} from '@/repositories/interfaces';
+import { ICatechismClassRepository } from '@/repositories/catechism-class.repository';
+import { IUserRepository } from '@/repositories/user.repository';
 import {
 	CreateCatechismClass,
 	FindAllCatechismClassFilters,
