@@ -1,7 +1,5 @@
-import {
-	ICatechismClassRepository,
-	IUserRepository,
-} from '@/repositories/interfaces';
+import { ICatechismClassRepository } from '@/repositories/catechism-class.repository';
+import { IUserRepository } from '@/repositories/user.repository';
 import { CatechismClassService } from '@/services/catechism-class.service';
 import { CreateCatechismClass } from '@/schemas/catechism-class.schema';
 import { DaysOfWeek, User } from '@prisma/generated/prisma/client';
@@ -152,5 +150,64 @@ describe('CatechismClassService.create', () => {
 			'Conflict with existing class',
 		);
 		expect(mockCatechismClassRepository.create).not.toHaveBeenCalled();
+	});
+});
+
+describe('CatechismClassService.findAll', () => {
+	let service: CatechismClassService;
+
+	beforeEach(() => {
+		vi.clearAllMocks();
+		service = new CatechismClassService(
+			mockUserRepository,
+			mockCatechismClassRepository,
+		);
+	});
+
+	it('should call repository.findAll with correct filters', async () => {
+		// Arrange
+		const filters = {
+			status: true,
+			dayOfWeek: DaysOfWeek.MON,
+		};
+		const mockResponse = [
+			{
+				id: 'class-id',
+				status: true,
+				dayOfWeek: DaysOfWeek.MON,
+				startTime: new Date(),
+				endTime: new Date(),
+				location: 'Room 1',
+				catechistId: 'catechist-id',
+				minAge: 7,
+				maxAge: 7,
+				createdAt: new Date(),
+				updatedAt: new Date(),
+			},
+		];
+		mockCatechismClassRepository.findAll.mockResolvedValue(mockResponse);
+
+		// Act
+		const result = await service.findAll(filters);
+
+		// Assert
+		expect(mockCatechismClassRepository.findAll).toHaveBeenCalledWith(
+			filters,
+		);
+		expect(result).toEqual(mockResponse);
+	});
+
+	it('should call repository.findAll without filters', async () => {
+		// Arrange
+		const filters = {};
+		mockCatechismClassRepository.findAll.mockResolvedValue([]);
+
+		// Act
+		await service.findAll(filters);
+
+		// Assert
+		expect(mockCatechismClassRepository.findAll).toHaveBeenCalledWith(
+			filters,
+		);
 	});
 });

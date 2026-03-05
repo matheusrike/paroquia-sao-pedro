@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { createCatechismClassSchema } from '@/schemas/catechism-class.schema';
+import {
+	createCatechismClassSchema,
+	findAllCatechismClassFiltersSchema,
+} from '@/schemas/catechism-class.schema';
 
 describe('Create Catechism Class Schema', () => {
 	it('should be able to validate a correct catechism class data', () => {
@@ -93,5 +96,51 @@ describe('Create Catechism Class Schema', () => {
 		if (!result.success) {
 			expect(result.error.issues[0].message).toBe('Invalid Catechist ID');
 		}
+	});
+});
+
+describe('Find All Catechism Class Filters Schema', () => {
+	it('should be able to validate with all filters', () => {
+		const data = {
+			catechistId: '018b3f11-0000-7000-8000-000000000000',
+			status: true,
+			startTime: '08:00',
+			endTime: '10:00',
+			dayOfWeek: 'MON',
+		};
+
+		const result = findAllCatechismClassFiltersSchema.safeParse(data);
+
+		expect(result.success).toBe(true);
+	});
+
+	it('should be able to validate with empty filters', () => {
+		const data = {};
+
+		const result = findAllCatechismClassFiltersSchema.safeParse(data);
+
+		expect(result.success).toBe(true);
+	});
+
+	it('should be able to validate with partial filters', () => {
+		const data = {
+			status: false,
+			dayOfWeek: 'FRI',
+		};
+
+		const result = findAllCatechismClassFiltersSchema.safeParse(data);
+
+		expect(result.success).toBe(true);
+	});
+
+	it('should not be able to validate with invalid filters', () => {
+		const data = {
+			catechistId: 'invalid-uuid',
+			dayOfWeek: 'INVALID',
+		};
+
+		const result = findAllCatechismClassFiltersSchema.safeParse(data);
+
+		expect(result.success).toBe(false);
 	});
 });
