@@ -12,7 +12,7 @@ export interface ICatechismClassRepository {
 
 	findAll(
 		filters: FindAllCatechismClassFilters,
-	): Promise<CatechismClass | null>;
+	): Promise<CatechismClass[] | null>;
 
 	findConflict(params: {
 		dayOfWeek: DaysOfWeek;

@@ -44,8 +44,8 @@ export class CatechismClassRepositoryPrisma implements ICatechismClassRepository
 
 	findAll(
 		filters: FindAllCatechismClassFilters,
-	): Promise<CatechismClass | null> {
-		return prisma.catechismClass.findFirst({
+	): Promise<CatechismClass[] | null> {
+		return prisma.catechismClass.findMany({
 			where: filters,
 		});
 	}
