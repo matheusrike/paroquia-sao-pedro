@@ -2,7 +2,7 @@ import {
 	CreateCatechismClass,
 	FindAllCatechismClassFilters,
 } from '@/schemas/catechism-class.schema';
-import { CatechismClass, DaysOfWeek } from '@prisma/generated/prisma/client';
+import { CatechismClass, DaysOfWeek } from '@/entities/catechism-class.entity';
 import { ICatechismClassRepository } from '../catechism-class.repository';
 import { prisma } from '@prisma/client';
 

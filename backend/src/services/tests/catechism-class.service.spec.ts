@@ -2,7 +2,7 @@ import { ICatechismClassRepository } from '@/repositories/catechism-class.reposi
 import { IUserRepository } from '@/repositories/user.repository';
 import { CatechismClassService } from '@/services/catechism-class.service';
 import { CreateCatechismClass } from '@/schemas/catechism-class.schema';
-import { DaysOfWeek, User } from '@prisma/generated/prisma/client';
+import { User } from '@/entities/user.entity';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { buildDateWithTime } from '@/utils/convert-date-with-time';
 
@@ -36,7 +36,7 @@ describe('CatechismClassService.create', () => {
 
 	const classInput: CreateCatechismClass = {
 		catechistId: 'catechist-id',
-		dayOfWeek: DaysOfWeek.MON,
+		dayOfWeek: 'MON',
 		startTime: buildDateWithTime('09:00'),
 		endTime: buildDateWithTime('10:00'),
 		location: 'Room 1',
@@ -168,13 +168,13 @@ describe('CatechismClassService.findAll', () => {
 		// Arrange
 		const filters = {
 			status: true,
-			dayOfWeek: DaysOfWeek.MON,
+			dayOfWeek: 'MON',
 		};
 		const mockResponse = [
 			{
 				id: 'class-id',
 				status: true,
-				dayOfWeek: DaysOfWeek.MON,
+				dayOfWeek: 'MON',
 				startTime: new Date(),
 				endTime: new Date(),
 				location: 'Room 1',
