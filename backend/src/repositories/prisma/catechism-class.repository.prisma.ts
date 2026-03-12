@@ -16,16 +16,20 @@ export class CatechismClassRepositoryPrisma implements ICatechismClassRepository
 		});
 	}
 
-	findConflict(params: {
-		dayOfWeek: DaysOfWeek;
-		startTime: Date;
-		endTime: Date;
-		status: boolean;
-		location: string;
-		catechistId: string;
-	}): Promise<CatechismClass | null> {
+	findConflict(
+		params: {
+			dayOfWeek: DaysOfWeek;
+			startTime: Date;
+			endTime: Date;
+			status: boolean;
+			location: string;
+			catechistId: string;
+		},
+		excludeId?: string,
+	): Promise<CatechismClass | null> {
 		return prisma.catechismClass.findFirst({
 			where: {
+				id: { not: excludeId },
 				dayOfWeek: params.dayOfWeek,
 				status: params.status,
 				AND: [
@@ -47,6 +51,22 @@ export class CatechismClassRepositoryPrisma implements ICatechismClassRepository
 	): Promise<CatechismClass[] | null> {
 		return prisma.catechismClass.findMany({
 			where: filters,
+		});
+	}
+
+	findById(id: string): Promise<CatechismClass | null> {
+		return prisma.catechismClass.findUnique({
+			where: { id },
+		});
+	}
+
+	update(
+		id: string,
+		data: Omit<Partial<CatechismClass>, 'id' | 'updatedAt' | 'createdAt'>,
+	): Promise<CatechismClass | null> {
+		return prisma.catechismClass.update({
+			where: { id },
+			data,
 		});
 	}
 }

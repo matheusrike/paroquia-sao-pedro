@@ -52,7 +52,7 @@ enum CeremonyDocumentType {
 }
 
 model User {
-  id        String    @id @default(uuid())
+  id        String    @id @default(uuid(7))
   name      String
   email     String    @unique
   phone     String
@@ -70,7 +70,7 @@ model User {
 }
 
 model CatechismClass {
-  id          String     @id @default(uuid())
+  id          String     @id @default(uuid(7))
   minAge      Int
   maxAge      Int
   dayOfWeek   DaysOfWeek
@@ -89,7 +89,7 @@ model CatechismClass {
 }
 
 model ClassEnrollment {
-  id        String   @id @default(uuid())
+  id        String   @id @default(uuid(7))
   classId   String
   userId    String
   createdAt DateTime @default(now())
@@ -102,7 +102,7 @@ model ClassEnrollment {
 }
 
 model Ceremony {
-  id            String         @id @default(uuid())
+  id            String         @id @default(uuid(7))
   scheduledDate DateTime
   status        CeremonyStatus
   createdAt     DateTime       @default(now())
@@ -115,7 +115,7 @@ model Ceremony {
 }
 
 model CeremonyPerson {
-  id         String             @id @default(uuid())
+  id         String             @id @default(uuid(7))
   ceremonyId String
   name       String
   cpf        String
@@ -132,7 +132,7 @@ model CeremonyPerson {
 }
 
 model CeremonyDocument {
-  id         String               @id @default(uuid())
+  id         String               @id @default(uuid(7))
   ceremonyId String
   type       CeremonyDocumentType
   fileUrl    String
@@ -147,7 +147,7 @@ model CeremonyDocument {
 }
 
 model Donation {
-  id               String         @id @default(uuid())
+  id               String         @id @default(uuid(7))
   amount           Decimal        @db.Decimal(10, 2)
   status           DonationStatus
   method           String

@@ -42,3 +42,13 @@ export const findAllCatechismClassFiltersSchema = z.object({
 export type FindAllCatechismClassFilters = z.infer<
 	typeof findAllCatechismClassFiltersSchema
 >;
+
+export const updateCatechismClassSchema = createCatechismClassSchema
+	.partial()
+	.extend({
+		status: z
+			.boolean({ error: 'Invalid status (use true or false)' })
+			.optional(),
+	});
+
+export type UpdateCatechismClass = z.infer<typeof updateCatechismClassSchema>;

@@ -1,8 +1,12 @@
 import { ICatechismClassRepository } from '@/repositories/catechism-class.repository';
 import { IUserRepository } from '@/repositories/user.repository';
 import { CatechismClassService } from '@/services/catechism-class.service';
-import { CreateCatechismClass } from '@/schemas/catechism-class.schema';
+import {
+	CreateCatechismClass,
+	UpdateCatechismClass,
+} from '@/schemas/catechism-class.schema';
 import { User } from '@/entities/user.entity';
+import { CatechismClass } from '@/entities/catechism-class.entity';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { buildDateWithTime } from '@/utils/convert-date-with-time';
 
@@ -15,6 +19,8 @@ const mockCatechismClassRepository: ICatechismClassRepository = {
 	create: vi.fn(),
 	findConflict: vi.fn(),
 	findAll: vi.fn(),
+	findById: vi.fn(),
+	update: vi.fn(),
 };
 
 describe('CatechismClassService.create', () => {
@@ -77,14 +83,19 @@ describe('CatechismClassService.create', () => {
 		expect(mockUserRepository.findById).toHaveBeenCalledWith(
 			classInput.catechistId,
 		);
-		expect(mockCatechismClassRepository.findConflict).toHaveBeenCalledWith({
-			status: true,
-			dayOfWeek: classInput.dayOfWeek,
-			startTime: classInput.startTime,
-			endTime: classInput.endTime,
-			location: classInput.location,
-			catechistId: classInput.catechistId,
-		});
+		expect(mockCatechismClassRepository.findConflict).toHaveBeenCalledWith(
+			{
+				status: true,
+				dayOfWeek: classInput.dayOfWeek,
+				startTime: classInput.startTime,
+				endTime: classInput.endTime,
+				location: classInput.location,
+				catechistId: classInput.catechistId,
+				maxAge: classInput.maxAge,
+				minAge: classInput.minAge,
+			},
+			undefined,
+		);
 		expect(mockCatechismClassRepository.create).toHaveBeenCalledWith({
 			...classInput,
 			status: true,
@@ -124,13 +135,13 @@ describe('CatechismClassService.create', () => {
 		).rejects.toThrow('Inconsistency in the provided age ranges');
 	});
 
-	it('should throw an error for invalid age range (maxAge > minAge)', async () => {
+	it('should throw an error for invalid age range (minAge > maxAge)', async () => {
 		// Arrange
 		mockUserRepository.findById.mockResolvedValue(catechistMock);
 
 		// Act & Assert
 		await expect(
-			service.create({ ...classInput, minAge: 8, maxAge: 9 }),
+			service.create({ ...classInput, minAge: 9, maxAge: 7 }),
 		).rejects.toThrow('Inconsistency in the provided age ranges');
 	});
 
@@ -150,6 +161,119 @@ describe('CatechismClassService.create', () => {
 			'Conflict with existing class',
 		);
 		expect(mockCatechismClassRepository.create).not.toHaveBeenCalled();
+	});
+});
+
+describe('CatechismClassService.update', () => {
+	let service: CatechismClassService;
+
+	const existingClass: CatechismClass = {
+		id: 'class-id',
+		catechistId: 'catechist-id',
+		dayOfWeek: 'MON',
+		startTime: buildDateWithTime('09:00'),
+		endTime: buildDateWithTime('10:00'),
+		location: 'Room 1',
+		minAge: 7,
+		maxAge: 7,
+		status: true,
+		createdAt: new Date(),
+		updatedAt: new Date(),
+	};
+
+	const catechistMock: User = {
+		id: 'catechist-id',
+		name: 'Catechist Name',
+		role: 'CATECHIST',
+		email: 'test@gmail.com',
+		birthDate: new Date(),
+		cpf: '000.000.000-00',
+		phone: '123456789',
+		status: 'true',
+		createdAt: new Date(),
+		updatedAt: new Date(),
+	};
+
+	beforeEach(() => {
+		vi.clearAllMocks();
+		service = new CatechismClassService(
+			mockUserRepository,
+			mockCatechismClassRepository,
+		);
+	});
+
+	it('should update a catechism class successfully', async () => {
+		// Arrange
+		const updateData: UpdateCatechismClass = { location: 'Room 2' };
+		mockCatechismClassRepository.findById.mockResolvedValue(existingClass);
+		mockUserRepository.findById.mockResolvedValue(catechistMock);
+		mockCatechismClassRepository.findConflict.mockResolvedValue(null);
+		mockCatechismClassRepository.update.mockResolvedValue({
+			...existingClass,
+			location: 'Room 2',
+		});
+
+		// Act
+		const result = await service.update('class-id', updateData);
+
+		// Assert
+		expect(result.location).toBe('Room 2');
+		expect(mockCatechismClassRepository.findById).toHaveBeenCalledWith(
+			'class-id',
+		);
+		expect(mockCatechismClassRepository.findConflict).toHaveBeenCalledWith(
+			expect.any(Object),
+			'class-id',
+		);
+		expect(mockCatechismClassRepository.update).toHaveBeenCalledWith(
+			'class-id',
+			updateData,
+		);
+	});
+
+	it('should throw an error if class to update is not found', async () => {
+		mockCatechismClassRepository.findById.mockResolvedValue(null);
+
+		await expect(service.update('invalid-id', {})).rejects.toThrow(
+			'Class not found',
+		);
+	});
+
+	it('should validate catechist if catechistId is updated', async () => {
+		const updateData: UpdateCatechismClass = {
+			catechistId: 'new-catechist-id',
+		};
+		mockCatechismClassRepository.findById.mockResolvedValue(existingClass);
+		mockUserRepository.findById.mockResolvedValue(null); // Catequista não encontrado
+
+		await expect(service.update('class-id', updateData)).rejects.toThrow(
+			'Catechist not found',
+		);
+	});
+
+	it('should throw an error if update results in age inconsistency', async () => {
+		const updateData: UpdateCatechismClass = { minAge: 10, maxAge: 8 }; // min > max
+		mockCatechismClassRepository.findById.mockResolvedValue(existingClass);
+		mockUserRepository.findById.mockResolvedValue(catechistMock);
+
+		await expect(service.update('class-id', updateData)).rejects.toThrow(
+			'Inconsistency in the provided age ranges',
+		);
+	});
+
+	it('should throw an error if update results in a conflict', async () => {
+		const updateData: UpdateCatechismClass = {
+			startTime: buildDateWithTime('11:00'),
+		};
+		mockCatechismClassRepository.findById.mockResolvedValue(existingClass);
+		mockUserRepository.findById.mockResolvedValue(catechistMock);
+		mockCatechismClassRepository.findConflict.mockResolvedValue({
+			id: 'other-class-id',
+		} as any);
+
+		await expect(service.update('class-id', updateData)).rejects.toThrow(
+			'Conflict with existing class',
+		);
 	});
 });
 
